@@ -1,0 +1,52 @@
+<?php
+
+class AK_Order_User_Tarif extends AK_Data_EntityOrder {
+
+    public $id;
+    public $userId;
+    public $tarifId;
+    public $startDate;
+    public $endDateUser;
+    public $endDateKurator;
+    public $m;
+    public $period = AK_Order_Enum::PER_WEEK;
+
+    private $Tarif = null;
+
+    public function getTarif() {
+        if (null === $this->Tarif) {
+            $this->Tarif = new AK_Order_Monitoring_Tarif($this->tarifId);
+        }
+
+        return $this->Tarif;
+    }
+
+    public function getStartDateFormatted() {
+        return date('d-m-Y', $this->startDate);
+    }
+
+    public function getEndDateUserFormatted() {
+        return date('d-m-Y', $this->endDateUser);
+    }
+
+    public function getEndDateKuratorFormatted() {
+        return date('d-m-Y', $this->endDateKurator);
+    }
+    
+    public function __construct ($val = null) {
+        parent::__construct('orders_users__monitoring_tarifs', array(
+            'id' => 'id' ,
+            'm' => 'm' ,
+            'period' => 'period' ,
+            'user_id' => 'userId' ,
+            'tarif_id' => 'tarifId',
+            'start_date' => 'startDate',
+            'end_date_user' => 'endDateUser',
+            'end_date_kurator' => 'endDateKurator'
+            
+            ));
+
+        
+            $this->load($val);
+    }
+}

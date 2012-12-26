@@ -1,0 +1,34 @@
+<?php
+
+class AK_Order_Kontragent extends AK_Data_EntityOrder {
+
+    public $id;
+    public $inn;
+    public $title;
+    public $region;
+    public $country;
+    
+    public function __construct ($key = null, $val = null) {
+        parent::__construct('orders_kontragents', array(
+            'id' => 'id' ,
+            'inn' => 'inn' ,
+            'region' => 'region' ,
+            'title' => 'title' ,
+            'country' => 'country'));
+
+        if ($key !== null) {
+            if (!is_array($key)) {
+                $this->pkColName = $key;
+                $this->loadByPk($val);
+                $this->pkColName = 'id';
+            }
+            else {
+                $this->load($key);
+            }
+        }
+        else {
+            $this->pkColName = 'id';
+        }
+    }
+
+}

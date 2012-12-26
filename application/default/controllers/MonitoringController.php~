@@ -1,0 +1,122 @@
+<?php
+class MonitoringController extends AK_Controller_Action {
+
+    public $currentUser;
+    public $params;
+
+    public function __construct (Zend_Controller_Request_Abstract $request, Zend_Controller_Response_Abstract $response, array $invokeArgs = array()) {
+        parent::__construct($request, $response, $invokeArgs);
+        
+        if (defined('DISABLE_MONITORING') && DISABLE_MONITORING && ACTION_NAME!='disabled') {
+            $this->_redirect('/monitoring/disabled/');
+        }
+
+        $this->params = $this->_getAllParams();
+        $this->currentUser = $this->_user;
+        $this->view->currentUser = $this->currentUser;
+
+        if (!$this->currentUser->getLogin() ) {
+            $this->_redirect(SITE_URL);
+        }
+
+        if (!$this->_user->dogovorCreated && ACTION_NAME!='notapproved' && ACTION_NAME!='notarif'  && ACTION_NAME != 'disabled') {
+            $this->_redirect('/monitoring/notapproved/');
+        }
+        if (null === $this->_user->getTarifInfo() && ACTION_NAME!='notarif' && ACTION_NAME!='notapproved'  && ACTION_NAME != 'disabled') {
+            $this->_redirect('/monitoring/notarif/');
+        }
+    }
+
+    public function indexAction() {
+        include_once('monitoring/action.index.php');
+    }
+
+
+    public function eventsAction() {
+        $ttList = new AK_Order_Monitoring_Event_Type_List();
+        $this->view->ttList = $ttList->getList();
+    }
+
+    public function disabledAction() {
+
+    }
+
+    public function eventAction() {
+        $this->params['event_id'] = isset($this->params['event_id'])?$this->params['event_id']:0;
+        $this->view->event = new AK_Order_Monitoring_Event($this->params['event_id']);
+        if (!$this->view->event->id) $this->_redirect('/monitoring/');
+        $this->view->event->view();
+
+        
+    }
+
+    public function eventsdataAction() {
+        include_once('monitoring/action.eventsdata.php');
+    }
+
+    public function datafeedAction() {
+        include_once('monitoring/action.datafeed.php');
+    }
+
+    public function calendarAction() {
+        $ttList = new AK_Order_Monitoring_Event_Type_List();
+        $this->view->ttList = $ttList->getList();
+    }
+
+    public function statisticsAction() {
+
+    }
+
+    public function documentsAction() {
+        $tarifsList = new AK_Order_Monitoring_Tarif_List();
+        $tarifsList->addWhere('A.is_active = 1');
+        $this->view->tarifsList = $tarifsList->getList();
+
+        if (!$this->currentUser->getLogin() ) {
+            $this->_redirect(SITE_URL);
+        }
+
+        if ($this->currentUser->id != $this->_user->id ) {
+            $this->_redirect(SITE_URL);
+        }
+
+        //settings
+        $form1 = new AK_Form('editForm', 'post', SITE_URL.'/monitoring/documents/');
+
+        if ($form1->validate($this->params)) {
+
+            $this->_user->aktNotifyFlagMonitoring = empty($this->params['akt_notify_flag_monitoring'])?0:1;
+
+
+            $this->_user->save();
+            $this->_redirect(SITE_URL.'/monitoring/documents/');
+        }
+        else {
+
+            if (!$form1->isPostback()) {
+                $this->params['akt_notify_flag_monitoring'] = $this->_user->aktNotifyFlagMonitoring;
+            }
+            $form1->setDefaults($this->params);
+            $this->view->form1 = $form1;
+        }
+
+        $this->view->fparams = $this->params;
+    }
+    
+    public function listAction() {
+        include_once('monitoring/action.list.php');
+    }
+
+
+    public function notarifAction() {
+        include_once('monitoring/action.notarif.php');
+    }
+    
+    public function notapprovedAction() {
+       
+    }
+
+
+
+
+}

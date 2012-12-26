@@ -1,0 +1,78 @@
+<div class="promo_left">
+    <h1 class="lk_header">Личный кабинет</h1>
+
+
+  <div class="lk_menu">
+
+        <span class="{if CONTROLLER_NAME == 'users' && ACTION_NAME=='profile'}active{/if}l">&nbsp;<a href="{$user->getUserPath('profile')}">Сервисы </a>&nbsp;</span>
+        <span> | </span>
+        <span class="{if CONTROLLER_NAME == 'users' && ACTION_NAME=='orders'}active{/if}l">&nbsp;&nbsp;&nbsp;<a href="{$user->getUserPath('orders')}">Все заказы </a>&nbsp;&nbsp;</span>
+        <span> | </span>
+        <span class="{if CONTROLLER_NAME == 'users' && ACTION_NAME=='editprofile'}active{/if}l">&nbsp;<a href="{$user->getUserPath('editprofile')}">Личные данные</a>&nbsp;</span>
+  </div>
+  <div class="lk_menu3">
+
+        {if $user->useReport}
+            <span class="{if CONTROLLER_NAME == 'reports'}active{/if}l" >&nbsp;<a href="{$REPORTS_LINK}?c={$user->hash}">ОТЧЕТНОСТЬ</a>&nbsp;&nbsp;
+            <span> | </span></span>
+        {/if}
+
+        {if $user->useMonitoring}
+            <span class="{if CONTROLLER_NAME == 'monitoring'}active{/if}l"><a href="{$MONITORING_LINK}?c={$user->hash}">МОНИТОРИНГ</a>&nbsp;
+            <span> | </span></span>
+        {/if}
+
+        {if $user->useBase}
+            <span class="{if CONTROLLER_NAME == 'bases'}active{/if}l" >&nbsp;&nbsp;<a href="{$BASES_LINK}?c={$user->hash}">БД ПРЕДПРИЯТИЙ</a>&nbsp;&nbsp;&nbsp;
+            <span> | </span></span>
+        {/if}
+
+        {if $user->useVed}
+            <span class="{if CONTROLLER_NAME == 'ved'}active{/if}l" >&nbsp;&nbsp;<a href="{$VED_LINK}?c={$user->hash}">РЫНКИ</a>&nbsp;&nbsp;
+            <span> </span></span>
+        {/if}
+
+  </div>
+       
+
+ 
+</div>
+<div class="lk_menu2">
+{if CONTROLLER_NAME == 'monitoring'}
+
+        <span class="{if CONTROLLER_NAME == 'monitoring' && ACTION_NAME=='index'}active{/if}l">&nbsp;<a href="/monitoring/">Главная</a>&nbsp;</span>
+<span> | </span>
+        <span class="{if CONTROLLER_NAME == 'monitoring' && ACTION_NAME=='events'}active{/if}l"><a href="/monitoring/events/">События</a>&nbsp;</span>
+<span> | </span>
+        <span class="{if CONTROLLER_NAME == 'monitoring' && ACTION_NAME=='calendar'}active{/if}l">&nbsp;&nbsp;&nbsp;<a href="/monitoring/calendar/">Календарь</a>&nbsp;&nbsp;&nbsp;</span>
+<span> | </span>
+        <span class="{if CONTROLLER_NAME == 'monitoring' && ACTION_NAME=='statistics'}active{/if}l">&nbsp;&nbsp;&nbsp;<a href="/monitoring/statistics/">Статистика</a>&nbsp;&nbsp;&nbsp;</span>
+<span> | </span>
+        <span class="{if CONTROLLER_NAME == 'monitoring' && ACTION_NAME=='list'}active{/if}l"><a href="/monitoring/list/">Список мониторинга</a>&nbsp;</span>
+<span> | </span>
+        <span class="{if CONTROLLER_NAME == 'monitoring' && ACTION_NAME=='documents'}active{/if}l"><a href="/monitoring/documents/">Документы/Тарифы</a>&nbsp;&nbsp;</span>
+
+{/if}
+
+{if CONTROLLER_NAME == 'bases'}
+
+        <span class="{if CONTROLLER_NAME == 'bases' && ACTION_NAME=='index'}active{/if}l">&nbsp;<a href="/bases/">Online-заказ</a>&nbsp;&nbsp;</span>
+<span> | </span>
+        <span class="{if CONTROLLER_NAME == 'bases' && ACTION_NAME=='list'}active{/if}l">&nbsp;&nbsp;<a href="/bases/list/">Заказы</a>&nbsp;&nbsp;</span>
+<span> | </span>
+        <span class="{if CONTROLLER_NAME == 'bases' && ACTION_NAME=='documents'}active{/if}l">&nbsp;&nbsp;<a href="/bases/documents/">Документы</a>&nbsp;&nbsp;&nbsp;</span>
+
+{/if}
+
+{if CONTROLLER_NAME == 'reports'}
+
+        <span class="{if CONTROLLER_NAME == 'reports' && ACTION_NAME=='index'}active{/if}l">&nbsp;&nbsp;<a href="/reports/">Online-заказ</a>&nbsp;&nbsp;</span>
+<span> | </span>
+        <span class="{if CONTROLLER_NAME == 'reports' && ACTION_NAME=='list'}active{/if}l">&nbsp;&nbsp;<a href="/reports/list/">Заказы</a>&nbsp;&nbsp;</span>
+<span> | </span>
+        <span class="{if CONTROLLER_NAME == 'reports' && ACTION_NAME=='documents'}active{/if}l">&nbsp;&nbsp;<a href="/reports/documents/">Документы</a>&nbsp;&nbsp;&nbsp;</span>
+
+{/if}
+
+<p></p>
+</div>

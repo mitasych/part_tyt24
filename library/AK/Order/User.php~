@@ -1,0 +1,529 @@
+<?php
+class AK_Order_User extends AK_Data_EntityOrder {
+
+    public $id;
+    public $login;
+    public $site;
+    public $secondName;
+    public $thirdName;
+    public $name;
+    public $gender;
+    public $from;
+    public $password;
+    public $newPassword;
+    public $email;
+    public $phone;
+    public $additionalInfo;
+    public $subscribeFlag = 1;
+    public $vipiskaNotifyFlag = 0;
+
+    public $dogovorNotifyFlag = 0;
+    public $lastAccessDate = 0;
+    public $createDate;
+    public $status = 1;
+
+    public $organization;
+    public $innogrn;
+    public $position;
+    public $innogrn2;
+    public $dolj;
+    public $df;
+    public $di;
+    public $do;
+
+    public $doljr;
+    public $dfr;
+    public $dir;
+    public $dor;
+
+    public $dn;
+    public $dot;
+    public $akt_email;
+    public $companyProfile;
+
+    public $aktNotifyFlagReport = 0;
+    public $aktNotifyFlagBase = 0;
+    public $aktNotifyFlagMonitoring = 0;
+    public $aktNotifyFlagVed = 0;
+
+    public $useMonitoring = 0;
+    public $useReport = 0;
+    public $useBase = 0;
+    public $useVed = 0;
+
+    public $dogovorCreated = 0;
+
+    private $UserPath = null;
+    private $isUsedNamedPath = false;
+
+    public $balans = 0;
+    public $isDeleted = 0;
+
+    public $hash;
+
+    private $TarifInfo = null;
+
+
+    public function getTarifInfo() {
+        if (null === $this->TarifInfo) {
+
+            $_db = Zend_Registry :: get('DBORDER');
+
+            $sql = $_db->select()->from('orders_users__monitoring_tarifs', 'id')->where('user_id = ?', $this->id);
+            $res =  $_db->fetchCol($sql);
+
+            if (!empty($res[0])) {
+                $this->TarifInfo = new AK_Order_User_Tarif($res[0]);
+            }
+        }
+
+        return $this->TarifInfo;
+    }
+    public function getId () {
+        return $this->id;
+    }
+    public function setId ($value) {
+        $this->id = $value;
+        return $this;
+    }
+    /**
+     * @return unknown
+     */
+    public function getLogin () {
+        return $this->login;
+    }
+    public function getName () {
+        return $this->name;
+    }
+    public function getFrom () {
+        return $this->from;
+    }
+    public function getGender () {
+        return $this->gender;
+    }
+    public function getGenderName () {
+        $list = AK_Enum_Gender::getList();
+        return $list[$this->gender];
+    }
+    public function getFromName () {
+        $list = AK_Enum_From::getList();
+        return $list[$this->from];
+    }
+    public function getSecondName () {
+        return $this->secondName;
+    }
+    public function getThirdName () {
+        return $this->thirdName;
+    }
+    /**
+     * @param unknown_type $login
+     */
+    public function setLogin ($value) {
+        $this->login = $value;
+        return $this;
+    }
+    public function setName ($value) {
+        $this->name = $value;
+        return $this;
+    }
+    public function setFrom ($value) {
+        $this->from = $value;
+        return $this;
+    }
+    public function setGender ($value) {
+        $this->gender = $value;
+        return $this;
+    }
+    public function setSecondName ($value) {
+        $this->secondName = $value;
+        return $this;
+    }
+    public function setThirdName ($value) {
+        $this->thirdName = $value;
+        return $this;
+    }
+
+    public function getEmail() {
+        return $this->email;
+    }
+    public function setEmail($value) {
+        $this->email = $value;
+        return $this;
+    }
+
+    public function getPassword() {
+        return $this->password;
+    }
+    public function setPassword($value) {
+        $this->password = $value;
+        return $this;
+    }
+
+    public function getCreateDate() {
+        return $this->createDate;
+    }
+    public function setCreateDate($value) {
+        $this->createDate = $value;
+        return $this;
+    }
+
+    public function getIcq() {
+        return $this->icq;
+    }
+    public function setIcq($value) {
+        $this->icq = $value;
+        return $this;
+    }
+
+    public function getWebsite() {
+        return $this->website;
+    }
+    public function setWebsite($value) {
+        $this->website = $value;
+        return $this;
+    }
+
+    public function getSubscribeFlag() {
+        return $this->subscribeFlag;
+    }
+    public function setSubscribeFlag($value) {
+        $this->subscribeFlag = $value;
+        return $this;
+    }
+    public function getCommentNotifyFlag() {
+        return $this->commentNotifyFlag;
+    }
+    public function setCommentNotifyFlag($value) {
+        $this->commentNotifyFlag = $value;
+        return $this;
+    }
+    public function getAdditionalInfo() {
+        return $this->additionalInfo;
+    }
+    public function setAdditionalInfo($value) {
+        $this->additionalInfo = $value;
+        return $this;
+    }
+
+    public function getLastEventCount() {
+
+        $db = Zend_Registry::get('DBORDER');
+        $query = $db->select();
+        $query->from('orders_monitoring__events AS A', 'COUNT(A.id)');
+        $query->joinLeft('orders_monitoring__events_views AS B', 'B.event_id = A.id AND B.user_id = '.(int)$this->id, null);
+        $query->where('A.kontragent_id IN (SELECT kontragent_id FROM orders_users__kontragents WHERE user_id = ?)', $this->id);
+        $query->where('B.event_id IS NOT NULL');
+        $res = intval($db->fetchOne($query));
+        return $res;
+    }
+
+    /**
+     * Constructor.
+     * @param string $key - name of key for user load, range of id|login|email.
+     * if null (default) - user data don't loading.
+     * @param string $val - key value
+     * @return void
+     * @author Artem Sukharev
+     */
+    public function __construct ($key = null, $val = null) {
+        parent::__construct('orders_users__accounts', array(
+            'id' => 'id' ,
+            'login' => 'login' ,
+            'name' => 'name' ,
+            'site' => 'site' ,
+            'status' => 'status' ,
+            'second_name' => 'secondName' ,
+            'third_name' => 'thirdName' ,
+            'gender' => 'gender' ,
+            'from' => 'from' ,
+            'email' => 'email' ,
+            'password' => 'password' ,
+            'new_password' => 'newPassword' ,
+            'last_access_date' => 'lastAccessDate' ,
+            'create_date' => 'createDate' ,
+            'phone' => 'phone' ,
+            'subscribe_flag' => 'subscribeFlag' ,
+            'vipiska_notify_flag' => 'vipiskaNotifyFlag' ,
+
+            'dogovor_notify_flag' => 'dogovorNotifyFlag',
+
+            'organization' => 'organization',
+            'innogrn' => 'innogrn',
+            'position' => 'position',
+            'innogrn2' => 'innogrn2',
+            'dolj' => 'dolj',
+            'df' => 'df',
+            'di' => 'di',
+            'do' => 'do',
+
+            'doljr' => 'doljr',
+            'dfr' => 'dfr',
+            'dir' => 'dir',
+            'dor' => 'dor',
+
+            'dn' => 'dn',
+            'dot' => 'dot',
+            'akt_email' => 'akt_email',
+
+            'company_profile' => 'companyProfile',
+
+            'akt_notify_flag_report' => 'aktNotifyFlagReport',
+            'akt_notify_flag_base' => 'aktNotifyFlagBase',
+            'akt_notify_flag_monitoring' => 'aktNotifyFlagMonitoring',
+            'akt_notify_flag_ved' => 'aktNotifyFlagVed',
+
+
+            'use_monitoring' => 'useMonitoring' ,
+            'use_base' => 'useBase',
+            'use_report' => 'useReport',
+            'use_ved' => 'useVed',
+            'dogovor_created' => 'dogovorCreated',
+            'is_deleted' => 'isDeleted',
+
+            'balans' => 'balans',
+
+            'hash' => 'hash'
+
+
+
+        ));
+        /**
+         *
+         */
+
+        if ($key !== null) {
+            if (!is_array($key)) {
+                $this->pkColName = $key;
+                $this->loadByPk($val);
+            }
+            else {
+                $this->load($key);
+            }
+        }
+        else {
+            $this->pkColName = 'id';
+        }
+
+    }
+
+    public function getServicesString () {
+        $res = '';
+        if ($this->useBase) {
+            $res.='Б ';
+        }
+        if ($this->useReport) {
+            $res.='О ';
+        }
+        if ($this->useMonitoring) {
+            $res.='М ';
+        }
+        if ($this->useVed) {
+            $res.='В ';
+        }
+        return $res;
+    }
+
+    public function getOrders () {
+        $_db = Zend_Registry :: get('DBORDER');
+
+        $sql = $_db->select()->distinct()->from('orders_relations', 'order_id')->where('user_id = ?', $this->id)->order('order_id DESC');
+
+        $res =  $_db->fetchCol($sql);
+        $orders = array();
+        foreach ($res as $k => $v) {
+            $orders[] = new AK_Order_Item('id', $v);
+        }
+        return $orders;
+    }
+
+    public function getOrdersBase () {
+        $_db = Zend_Registry :: get('DBORDER');
+
+        $sql = $_db->select()->distinct()->from('orders_relations', 'order_id')->where('zakaz_type_id = ?', AK_Order_ZakazTypes::BASES)->where('user_id = ?', $this->id)->order('order_id DESC');
+
+        $res =  $_db->fetchCol($sql);
+        $orders = array();
+        foreach ($res as $k => $v) {
+            $orders[] = new AK_Order_Item('id', $v);
+        }
+        return $orders;
+    }
+    public function getOrdersBaseCount () {
+        $_db = Zend_Registry :: get('DBORDER');
+
+        $sql = $_db->select()->distinct()->from('orders_relations', 'order_id')->where('zakaz_type_id = ?', AK_Order_ZakazTypes::BASES)->where('user_id = ?', $this->id);
+
+        return count($_db->fetchCol($sql));
+    }
+    public function getOrdersMonitoring () {
+        $_db = Zend_Registry :: get('DBORDER');
+
+        $sql = $_db->select()->distinct()->from('orders_relations', 'order_id')->where('zakaz_type_id = ?', AK_Order_ZakazTypes::MONITORING)->where('user_id = ?', $this->id)->order('order_id DESC');
+
+        $res =  $_db->fetchCol($sql);
+        $orders = array();
+        foreach ($res as $k => $v) {
+            $orders[] = new AK_Order_Item('id', $v);
+        }
+        return $orders;
+    }
+    public function getOrdersMonitoringCount () {
+        $_db = Zend_Registry :: get('DBORDER');
+
+        $sql = $_db->select()->distinct()->from('orders_relations', 'order_id')->where('zakaz_type_id = ?', AK_Order_ZakazTypes::MONITORING)->where('user_id = ?', $this->id);
+
+        return count($_db->fetchCol($sql));
+    }
+    public function getOrdersReport () {
+        $_db = Zend_Registry :: get('DBORDER');
+
+        $sql = $_db->select()->distinct()->from('orders_relations', 'order_id')->where('zakaz_type_id = ?', AK_Order_ZakazTypes::CONTRAGENT_CHECK)->where('user_id = ?', $this->id)->order('order_id DESC');
+
+        $res =  $_db->fetchCol($sql);
+        $orders = array();
+        foreach ($res as $k => $v) {
+            $orders[] = new AK_Order_Item('id', $v);
+        }
+        return $orders;
+    }
+    public function getOrdersReportCount () {
+        $_db = Zend_Registry :: get('DBORDER');
+
+        $sql = $_db->select()->distinct()->from('orders_relations', 'order_id')->where('zakaz_type_id = ?', AK_Order_ZakazTypes::CONTRAGENT_CHECK)->where('user_id = ?', $this->id);
+
+        return count($_db->fetchCol($sql));
+    }
+
+    /**
+     * Устанавливает http адрес для пользователя
+     * @return void
+     */
+    public function setUserPath () {
+
+        if ($this->UserPath === null) {
+            $this->UserPath = SITE_URL . '/users/';
+        }
+    }
+    /**
+     * Возвращает http адрес для пользователя
+     * @return string
+     */
+    public function getUserPath ($action = null, $withslash = true) {
+        if ($this->UserPath === null) {
+            $this->setUserPath();
+        }
+        if ($action !== null) {
+            if ($this->isUsedNamedPath == false) {
+                return ($withslash) ? $this->UserPath . $action . '/userid/' . $this->id . '/' : $this->UserPath . $action . '/userid/' . $this->id;
+            }
+            else {
+                return ($withslash) ? $this->UserPath . $action . '/' : $this->UserPath . $action;
+            }
+        }
+        else {
+            return $this->UserPath;
+        }
+    }
+
+    public function updateLastAccessDate () {
+        $query = $this->_db->quoteInto('UPDATE orders_users__accounts SET last_access_date = ' . time() . ' WHERE id = ?', $this->id);
+        $this->_db->query($query);
+    }
+
+
+    public function isAuthenticated () {
+        return (isset($_SESSION['user_id']) && $_SESSION['user_id'] !== null) ? true : false;
+    }
+    /**
+     * Аутентификация пользователя
+     * @author Artem Sukharev
+     */
+    public function authenticate () {
+        $_SESSION['user_id'] = $this->id;
+
+    }
+    /**
+     * Завершение сессии пользователя
+     * @author Artem Sukharev
+     */
+    public function logout () {
+        unset($_SESSION['user_id']);
+    }
+
+    /**
+     * Восстановление пароля
+     */
+    public function restorePassword () {
+
+    }
+
+
+
+    public static function validateLogin ($login, $password) {
+        $db = Zend_Registry::get('DBORDER');
+        $select = $db->select();
+        $select->from('orders_users__accounts', 'id')->where('is_deleted = 0')->where('login = ?', $login)->where("(new_password = '".md5($password)."' OR password = ?)", md5($password));
+        $res = $db->fetchOne($select);
+        return (boolean) $res;
+    }
+
+    public static function isUserExists ($key, $value, $exclude = null) {
+        $db = Zend_Registry::get('DBORDER');
+        if (! in_array($key, array(
+        'id' ,
+        'login' ,
+        'email'))) {
+            return false;
+        }
+        $select = $db->select();
+        $select->from('orders_users__accounts', 'count(id) as count')->where($key . ' = ?', $value);
+        //->where('status != ?', 'deleted');
+        if ($exclude !== null) {
+            $select->where($key . ' NOT IN (?)', $exclude);
+        }
+        $res = $db->fetchOne($select);
+        return (boolean) $res;
+    }
+
+
+
+
+
+    public function getFio () {
+        return $this->secondName.' '.$this->name.' '.$this->thirdName;
+    }
+    public function getAktNotifyFlagAsYesno() {
+        if (!empty($this->aktNotifyFlag)) {
+            return "<font color=green>Да</font>";
+        }
+        else {
+            return "<font color=red>Нет</font>";
+        }
+    }
+
+
+    public function getSubscribeFlagAsYesno() {
+        if (!empty($this->subscribeFlag)) {
+            return "<font color=green>Да</font>";
+        }
+        else {
+            return "<font color=red>Нет</font>";
+        }
+    }
+    public function getVipiskaNotifyFlagAsYesno() {
+        if (!empty($this->vipiskaNotifyFlag)) {
+            return "<font color=green>Да</font>";
+        }
+        else {
+            return "<font color=red>Нет</font>";
+        }
+    }
+    public function getAdditionalInfoTruncated() {
+        $result = $this->additionalInfo;
+        if (mb_strlen($result,'utf-8') >250) {
+            $result = mb_substr($result,0,250-3,'utf-8').'...';
+        }
+        return $result;
+    }
+
+}

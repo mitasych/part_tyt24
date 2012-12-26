@@ -1,0 +1,21 @@
+<?php
+
+class AK_Location_Country extends AK_Data_EntityOrder
+{
+    public $id;
+    public $name;
+    public $code;
+
+    /**
+     * Constructor.
+     *
+     */
+	public function __construct($value = null)
+	{
+        parent::__construct('orders_location__countries', array(
+            'id'   => 'id',
+            'name' => 'name',
+            'code' => 'code'));
+        $this->load($value);
+	}
+}

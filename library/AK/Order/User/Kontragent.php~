@@ -1,0 +1,29 @@
+<?php
+
+class AK_Order_User_Kontragent extends AK_Data_EntityOrder {
+
+    public $id;
+    public $userId;
+    public $kontragentId;
+
+    private $Kontragent = null;
+
+    public function getKontragent() {
+        if (null === $this->Kontragent) {
+            $this->Kontragent = new AK_Order_Kontragent('id', $this->kontragentId);
+        }
+        return $this->Kontragent;
+    }
+    
+    public function __construct ($val = null) {
+        parent::__construct('orders_users__kontragents', array(
+            'id' => 'id' ,
+            'user_id' => 'userId' ,
+            'kontragent_id' => 'kontragentId'
+            ));
+
+        $this->load($val);
+         
+    }
+
+}
